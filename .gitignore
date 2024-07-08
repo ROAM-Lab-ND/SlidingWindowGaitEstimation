@@ -1,0 +1,7 @@
+*.asv
+*.m4v
+*.mp4
+*.avi
+.DS_Store
+LargeFileData/
+Videos/
