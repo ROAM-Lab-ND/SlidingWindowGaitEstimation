@@ -53,9 +53,22 @@ void loadData(string kernel_path){
 }
 
 int main(){
-    MotionMatcher test_matcher("/Users/whitebook/Desktop/ConvolutionGaitPhaseEstimation/Data/DataBase_CSV/Slow_AB_Reference.csv");
+
+    // Load motion library
+    int num_motion = 1;
+    vector<MotionMatcher> motion_lib;
+    motion_lib.reserve(num_motion);
+    for (size_t i_motion = 0; i_motion < num_motion; ++i_motion) {
+        motion_lib.emplace_back("/Users/whitebook/Desktop/ConvolutionGaitPhaseEstimation/Data/DataBase_CSV/Slow_AB_Reference.csv");
+    }
+    // MotionMatcher test_matcher("/Users/whitebook/Desktop/ConvolutionGaitPhaseEstimation/Data/DataBase_CSV/Slow_AB_Reference.csv");
+
+    float* motion_score = new float[num_motion];
+    
+    // Load experiment data
     loadData("/Users/whitebook/Desktop/ConvolutionGaitPhaseEstimation/Data/Experiment_CSV/Multispeed_Walk_AB.csv");
 
+    // Set a reasonalbe interval for test
     int time_start = 5000;
     int time_end   = 7000;
     int dataLen = time_end - time_start;
@@ -64,9 +77,15 @@ int main(){
     cout << "Start" << endl;
     auto start_total = high_resolution_clock::now();
     for (size_t i = time_start; i < time_end; ++i) {
+        // Each data frame
         float* newData = sensor_data + (i * m);
-        test_matcher.pushData(newData);
-        gait_pct[i-time_start] = test_matcher.getGait();
+        for (size_t i_motion = 0; i_motion < num_motion; ++i_motion) {
+            motion_score[i_motion] = motion_lib[i_motion].pushData(newData);
+        }
+        // test_matcher.pushData(newData);
+        float* best_motion = min_element(motion_score, motion_score + num_motion);
+        int motion_index = best_motion - motion_score;
+        gait_pct[i-time_start] = motion_lib[motion_index].getGait();
     }  
     auto end_total   = high_resolution_clock::now();
     auto duration_total = duration_cast<microseconds>(end_total - start_total);

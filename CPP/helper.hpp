@@ -9,10 +9,12 @@
 #include <cstdlib>
 #include <iomanip>
 #include <cmath>
+#include <algorithm>
 
 #include <chrono>
 
 #define DEBUG
+// #define DETAIL_PRINT
 
 using namespace std;
 using namespace chrono;

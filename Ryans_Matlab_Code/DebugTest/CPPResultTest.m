@@ -6,7 +6,7 @@ tstart = 5000;
 tend = 6999;
 gait_without_saving = sse_without_saving(expdata,tstart,tend);
 gait_with_saving = sse_with_saving(expdata,tstart,tend);
-CPPResult = readmatrix("../../CPPResult/Test.csv");
+CPPResult = readmatrix("../CPPResult/Test.csv");
 
 %% 
 

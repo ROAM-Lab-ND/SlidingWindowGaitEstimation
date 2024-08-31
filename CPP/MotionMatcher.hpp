@@ -1,4 +1,3 @@
-#include <algorithm>
 #include "helper.hpp"
 
 class MotionMatcher {
@@ -10,6 +9,10 @@ public:
     float * r;  // Result, dim: N
     int ind = 0;// Rolling index
     int match_ind = 0; // Index that best match
+    float min_error = 0; // Minimum SSE error
+    
+    bool ready = false; // For future use (encapsulation): if we found init() function is necessary, 
+    // we'd better check this at pushData() to avoid user error.
 
 
     /* Note: The rolling kernel is arranged in reverse order as:
@@ -22,10 +25,22 @@ public:
        to improve the locality.
     */
 
-    MotionMatcher (string kernel_path){
-        loadKernel(kernel_path);
-        init();
+    /* Note: reuslt cache r is not the actual matching result, the actual result start from 
+       the ind-th element of r, where ind is the rolling index, then rolling as:
+       actual result = r[ind] --> ... --> r[end] --> r[start] --> ... --> r[ind-1]
+    */
+
+    MotionMatcher () {
+        // Do nothing. For array init.
     }
+
+    MotionMatcher (string kernel_path) {
+        loadKernel(kernel_path);
+        initCache();
+        clearCache();
+        ready = true;
+    }
+
     ~MotionMatcher () {
         #ifdef DEBUG
         cout << "Destructing MotionMatcher" << endl;
@@ -35,24 +50,39 @@ public:
         delete [] r;
     }
 
-    void init (){
-        // Create and init cache matrix
+    void init (string kernel_path) {
+        loadKernel(kernel_path);
+        initCache();
+        clearCache();
+        ready = true;
+    }
+
+    void initCache () {
+        // Create cache matrix
         A = new float[N * N];
+        // Create result array
+        r = new float[N];
+    }
+
+    void clearCache (){
+        // Reset index
+        ind = 0;
+        
+        // Clear cache matrix
         for (int row = 0; row < N; row++){
             for (int col = 0; col < N; col++){
             A[row * N + col] = 0.0;
             }
         }
         
-        // Create and init result array
-        r = new float[N];
+        // Clear result array
         for (size_t col = 0; col < N; col++){
             r[col] = 0;
         }
 
     }
 
-    void loadKernel(string kernel_path){
+    void loadKernel(string kernel_path) {
     
         ///////// Load Kernel File //////////
         ifstream kernel_file(kernel_path, ios::in);
@@ -72,7 +102,9 @@ public:
         getline(kernel_file,linestr);
 
         rk  = new float[m * 2 * N];
+        #ifdef DETAIL_PRINT
         float k[N][m];
+        #endif //DETAIL_PRINT
         
         for (int i_time = 0; i_time < N; ++i_time){
             line_split.clear();
@@ -81,19 +113,21 @@ public:
             SplitString(linestr,vector_split,",");
             for (int i_kernel = 0; i_kernel < m; ++i_kernel){
                 float temp = strtof(vector_split[i_kernel].c_str(), NULL);
+                #ifdef DETAIL_PRINT
                 k[i_time][i_kernel] = temp;
+                #endif //DETAIL_PRINT
                 int ind_rolling = (i_time != 0) ? (N - i_time) : 0;
                 rk[      ind_rolling * m + i_kernel] = temp;
                 rk[(N + ind_rolling) * m + i_kernel] = temp;
 
-                // #ifdef DEBUG
-                // cout    << k[i_time][i_kernel] << ", ";
-                // #endif //DEBUG
+                #ifdef DETAIL_PRINT
+                cout    << k[i_time][i_kernel] << ", ";
+                #endif //DETAIL_PRINT
             }
             
-            // #ifdef DEBUG
-            // cout << endl;
-            // #endif //DEBUG
+            #ifdef DETAIL_PRINT
+            cout << endl;
+            #endif //DETAIL_PRINT
         }
         
         
@@ -111,7 +145,7 @@ public:
     }
 
 
-    void pushData(float* newdata){
+    float pushData(float* newdata) {
         for (size_t j = 0; j < N; ++j) {
             r[j] -= A[ind * N + j];
             float temp = 0.0;
@@ -130,16 +164,18 @@ public:
         }
         // ind = (ind + 1) % N;
 
-        getMatchInd();
+        return getMatch();
 
     }
 
-    void getMatchInd() {
-        float* minElement = min_element(r, r + N);
-        match_ind = minElement - r - ind;
+    float getMatch() {
+        float* minError = min_element(r, r + N);
+        min_error = *minError;
+        match_ind = (minError - r) - ind; // Shifted by ind
         if (match_ind < 0) {
             match_ind += N;
         }
+        return min_error;
     }
 
     float getGait() {
