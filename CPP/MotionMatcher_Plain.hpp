@@ -5,8 +5,8 @@ public:
     size_t N;   // Length of kernel
     size_t m;   // Number of kernels (each one represent a channel)
     float * rk; // Duplicated rolling kernel, dim: 2Nxm
-    float * A;  // Cache matrix, dim: NxN
     float * r;  // Result, dim: N
+    float * w;  // Windowed data, dim: Nxm
     int ind = 0;// Rolling index
     int match_ind = 0; // Index that best match
     float min_error = 0; // Minimum SSE error
@@ -43,10 +43,10 @@ public:
 
     ~MotionMatcher () {
         #ifdef DEBUG
-        cout << "Destructing MotionMatcher" << endl;
+        cout << "Destructing MotionMatcher - Plain" << endl;
         #endif
         delete [] rk;
-        delete [] A;
+        delete [] w;
         delete [] r;
     }
 
@@ -58,8 +58,8 @@ public:
     }
 
     void initCache () {
-        // Create cache matrix
-        A = new float[N * N];
+        // Create data matrix
+        w = new float[N * m];
         // Create result array
         r = new float[N];
     }
@@ -68,10 +68,10 @@ public:
         // Reset index
         ind = 0;
         
-        // Clear cache matrix
+        // Clear data matrix
         for (int row = 0; row < N; row++){
-            for (int col = 0; col < N; col++){
-            A[row * N + col] = 0.0;
+            for (int col = 0; col < m; col++){
+                w[row * m + col] = 0.0;
             }
         }
         
@@ -146,15 +146,21 @@ public:
 
 
     float pushData(float* newdata) {
+        for (size_t i = 0; i < m; ++i) {
+            w[ind * m + i] = newdata[i];
+        }
+        float diff;
         for (size_t j = 0; j < N; ++j) {
-            r[j] -= A[ind * N + j];
-            float temp = 0.0;
-            for (size_t i = 0; i < m; ++i) {
-                float diff = rk[(N + j - ind) * m + i] - newdata[i]; // Good without pointer
-                temp +=  diff * diff;
+            // For each sliding config
+            r[j] = 0.0;
+            for (size_t time_ind = 0; time_ind < N; ++time_ind) {
+                // float temp = 0.0; // SSE for 
+                for (size_t i = 0; i < m; ++i) {
+                    diff = rk[(j + N - time_ind) * m + i] - w[time_ind * m + i];
+                    r[j] +=  diff * diff;
+                }
+                // r[j] += temp;
             }
-            A[ind * N + j] = temp;
-            r[j] += temp;
         }
         
         // step size is 1

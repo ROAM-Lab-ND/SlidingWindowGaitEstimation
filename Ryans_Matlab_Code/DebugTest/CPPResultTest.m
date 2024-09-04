@@ -2,22 +2,29 @@ clc;
 clear all;
 close all;
 expdata = 'Multispeed_Walk_AB.mat';
-tstart = 5000;
-tend = 6999;
+tstart = 5000 + 1;
+tend = 7000;
 gait_without_saving = sse_without_saving(expdata,tstart,tend);
-gait_with_saving = sse_with_saving(expdata,tstart,tend);
-CPPResult = readmatrix("../CPPResult/Test.csv");
-
+% gait_with_saving = sse_with_saving(expdata,tstart,tend);
 %% 
 
-figure()
+CPPResult_Trick = readmatrix("../CPPResult/Test_Trick.csv");
+CPPResult_Plain = readmatrix("../CPPResult/Test_Plain.csv");
+% CPPResult_PlainTest = readmatrix("../CPPResult/Test.csv");
+
+%
+
+figure(1)
+clf;
 hold on
-plot(gait_without_saving,'LineWidth',2)
-plot(gait_with_saving,'-.','LineWidth',2)
+plot(gait_without_saving,'LineWidth',4,'DisplayName',"SSE without save")
+% plot(gait_with_saving,'-.','LineWidth',2,'DisplayName',"SSE with save")
 
-plot(CPPResult,'--','LineWidth',2);
+% plot(CPPResult_PlainTest,'-','LineWidth',2,'DisplayName',"CPP Test without save");
+plot(CPPResult_Plain,'-','LineWidth',2,'DisplayName',"CPP without save");
+plot(CPPResult_Trick,'--','LineWidth',2,'DisplayName',"CPP with save");
 
-legend("SSE without save","SSE with save","CPP");
+legend()
 
 
 
