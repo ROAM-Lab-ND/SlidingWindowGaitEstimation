@@ -1,4 +1,4 @@
-function YAML2CSV(DATAFILE, csvpath)
+function YAML2CSV(DATAFILE, ID, name, csvpath)
 % YAML2CSV Read yaml file and save as in csv
 % Input: yaml file name
 
@@ -16,7 +16,7 @@ kernel_num  = length(kernel_name);
 file_csv = fopen(csvpath + DATANAME + ".csv",'w');
 
 % Output headers
-fprintf(file_csv,'Dimension,%d,%d',kernel_num,kernel_length);
+fprintf(file_csv,'Name:%s;ID:%d;Dimension:%dx%d',name,ID,kernel_num,kernel_length);
 fprintf(file_csv,'\n');
 for i = 1:kernel_num
     fprintf(file_csv,'%s,',kernel_name{i});

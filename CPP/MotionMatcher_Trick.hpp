@@ -10,6 +10,8 @@ public:
     int ind = 0;// Rolling index
     int match_ind = 0; // Index that best match
     float min_error = 0; // Minimum SSE error
+    string kernel_name;  // Name of motion
+    int kernel_id;      // ID of motion
     
     bool ready = false; // For future use (encapsulation): if we found init() function is necessary, 
     // we'd better check this at pushData() to avoid user error.
@@ -86,19 +88,54 @@ public:
     
         ///////// Load Kernel File //////////
         ifstream kernel_file(kernel_path, ios::in);
-        
+
         string linestr;
         vector<string> line_split;
+        vector<string> field_split;
         vector<string> vector_split;
 
-        vector_split.clear();
+        bool hasDim = false;
         getline(kernel_file,linestr);
-        SplitString(linestr,vector_split,",");
+        SplitString(linestr,line_split,";");
+        for (const string& line_split_str : line_split) {
+            field_split.clear();
+            SplitString(line_split_str,field_split,":");
+            if (field_split[0] == "Name") {
+                kernel_name = field_split[1]; // Name of motion
+                #ifdef DEBUG
+                disp(kernel_name);
+                #endif
+            }else if (field_split[0] == "ID") {
+                kernel_id = atoi(field_split[1].c_str()); // ID of motion
+                #ifdef DEBUG
+                disp(kernel_id);
+                #endif
+            }else if (field_split[0] == "Dimension") {
+                vector_split.clear();
+                SplitString(field_split[1],vector_split,"x");
+                m = atoi(vector_split[0].c_str()); // Number of kernels
+                N = atoi(vector_split[1].c_str()); // Length of kernel
+                hasDim = true;
+                #ifdef DEBUG
+                disp(m);
+                disp(N);
+                #endif
+            }else {
+                #ifdef DEBUG
+                cout << "Warning while reading csv file: " << kernel_path << endl;
+                cout << "Unknown field in header term: " << line_split_str << endl;
+                #endif
+            }
+        }
 
-        m = atoi(vector_split[1].c_str()); // Number of kernels
-        N = atoi(vector_split[2].c_str()); // Length of kernel
+        if (!hasDim) {
+            std::cerr << "Error whiler eading csv file: " << kernel_path << std::endl;
+            std::cerr << "Dimensions are not defined" << std::endl;
+            exit(1);
+        }
 
-        // Flush the header line
+        // Flush the header line for signal name
+        // Can be used for future
         getline(kernel_file,linestr);
 
         rk  = new float[m * 2 * N];
@@ -182,6 +219,14 @@ public:
     float getGait() {
         float gait_pct = 1.0 - ((float)match_ind / N);
         return gait_pct;
+    }
+
+    int getID() {
+        return kernel_id;
+    }
+
+    string getName() {
+        return kernel_name;
     }
 
 };

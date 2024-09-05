@@ -65,6 +65,22 @@ void saveResult(string file_path, float* data, int data_length){
 
 }
 
+void saveResult(string file_path, float* gait_pct, int* motion_id, int data_length){
+    cout<<setiosflags(ios::fixed); 
+    ofstream csvLog;
+    csvLog.open(file_path);
+    csvLog << "gait_pct"  << ", ";
+    csvLog << "motion_id" << ", ";
+    csvLog << "\n";
+    for (size_t i_time = 0; i_time < data_length; i_time++) {
+        csvout(csvLog,gait_pct[i_time],false);
+        csvout(csvLog,motion_id[i_time],false);
+        csvLog << "\n";
+    }
+    csvLog.close();
+
+}
+
 
 
 #endif

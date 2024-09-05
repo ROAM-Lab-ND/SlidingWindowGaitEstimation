@@ -9,13 +9,13 @@ end
 % Clear all existing files under the datapath
 system("rm -rf "+csvpath+"*");
 
-YAML2CSV('Slow_AB_Reference.yaml', csvpath);
-YAML2CSV('Med_AB_Reference.yaml', csvpath);
-YAML2CSV('Fast_AB_Reference.yaml', csvpath);
-YAML2CSV('RA_AB_Reference.yaml', csvpath);
-YAML2CSV('RD_AB_Reference.yaml', csvpath);
-YAML2CSV('SA_AB_Reference.yaml', csvpath);
-YAML2CSV('SD_AB_Reference.yaml', csvpath);
+YAML2CSV('Slow_AB_Reference.yaml', 1, "Slow", csvpath);
+YAML2CSV('Med_AB_Reference.yaml', 2, "Med", csvpath);
+YAML2CSV('Fast_AB_Reference.yaml', 3, "Fast", csvpath);
+YAML2CSV('RA_AB_Reference.yaml', 4, "RA", csvpath);
+YAML2CSV('RD_AB_Reference.yaml', 5, "RD", csvpath);
+YAML2CSV('SA_AB_Reference.yaml', 6, "SA", csvpath);
+YAML2CSV('SD_AB_Reference.yaml', 7, "SD", csvpath);
 
 %%
 collected_data = load('Collected_Data/Multispeed_Walk_AB.mat');
@@ -31,7 +31,7 @@ end
 file_csv = fopen("../Data/Experiment_CSV/" + DATANAME + ".csv",'w');
 
 % Output headers
-fprintf(file_csv,'Dimension,%d,%d',data_num,data_length);
+fprintf(file_csv,'Dimension:%dx%d',data_num,data_length);
 fprintf(file_csv,'\n');
 for i = 1:data_num
     fprintf(file_csv,'%s,',data_name{i});

@@ -30,23 +30,48 @@ int m, len;
 float* sensor_data;
 float* newData;
 
-void loadData(string kernel_path){
+void loadData(string data_path){
 
     ///////// Load data File //////////
-    ifstream data_file(kernel_path, ios::in);
+    ifstream data_file(data_path, ios::in);
     
     string linestr;
     vector<string> line_split;
+    vector<string> field_split;
     vector<string> vector_split;
 
-    vector_split.clear();
+    bool hasDim = false;
     getline(data_file,linestr);
-    SplitString(linestr,vector_split,",");
+    SplitString(linestr,line_split,";");
+    for (const string& line_split_str : line_split) {
+        field_split.clear();
+        SplitString(line_split_str,field_split,":");
+        if (field_split[0] == "Name") {
+            // Do nothing
+        }else if (field_split[0] == "ID") {
+            // Do nothing
+        }else if (field_split[0] == "Dimension") {
+            vector_split.clear();
+            SplitString(field_split[1],vector_split,"x");
+            m = atoi(vector_split[0].c_str()); // Number of channels
+            len = atoi(vector_split[1].c_str()); // Length of data
+            hasDim = true;
+        }else {
+            #ifdef DEBUG
+            cout << "Warning while reading csv file: " << data_path << endl;
+            cout << "Unknown field in header term: " << line_split_str << endl;
+            #endif
+        }
+    }
 
-    m = atoi(vector_split[1].c_str()); // Number of channels
-    len = atoi(vector_split[2].c_str()); // Length of data
+    if (!hasDim) {
+        std::cerr << "Error whiler eading csv file: " << data_path << std::endl;
+        std::cerr << "Dimensions are not defined" << std::endl;
+        exit(1);
+    }
 
-    // Flush the header line
+    // Flush the header line for signal name
+    // Can be used for future
     getline(data_file,linestr);
 
     sensor_data  = new float[m * len];
@@ -56,7 +81,6 @@ void loadData(string kernel_path){
     // #endif //DEBUG
     
     for (int i_time = 0; i_time < len; ++i_time){
-        line_split.clear();
         vector_split.clear();
         getline(data_file,linestr);
         SplitString(linestr,vector_split,",");
@@ -109,20 +133,19 @@ int main(int argc, char* argv[]){
     int time_end = stoi(argv[4]);
     string outputFileName = argv[5];
 
-    // std::vector<std::string> csvFiles = getCSVFilesInFolder(motionLibPath);
-    getCSVFilesInFolder(motionLibPath);
+    std::vector<std::string> csvFiles = getCSVFilesInFolder(motionLibPath);
 
 
     // Load motion library
-    int num_motion = 1;//csvFiles.size();
+    int num_motion = csvFiles.size();
     vector<MotionMatcher> motion_lib;
     motion_lib.reserve(num_motion);
-    // for(const auto& file : csvFiles) {
-    //     motion_lib.emplace_back(file);
-    // }
-    for (size_t i_motion = 0; i_motion < num_motion; ++i_motion) {
-        motion_lib.emplace_back("/Users/whitebook/Desktop/ConvolutionGaitPhaseEstimation/Data/DataBase_CSV/Slow_AB_Reference.csv");
+    for(const auto& file : csvFiles) {
+        motion_lib.emplace_back(file);
     }
+    // for (size_t i_motion = 0; i_motion < num_motion; ++i_motion) {
+    //     motion_lib.emplace_back("/Users/whitebook/Desktop/ConvolutionGaitPhaseEstimation/Data/DataBase_CSV/Slow_AB_Reference.csv");
+    // }
 
     float* motion_score = new float[num_motion];
     
@@ -132,6 +155,7 @@ int main(int argc, char* argv[]){
     // Set a reasonalbe interval for test
     int dataLen = time_end - time_start;
     float gait_pct[dataLen];
+    int  motion_ID[dataLen];
   
     cout << "Start" << endl;
     float* best_motion;
@@ -146,6 +170,7 @@ int main(int argc, char* argv[]){
         best_motion = min_element(motion_score, motion_score + num_motion);
         motion_index = best_motion - motion_score;
         gait_pct[i-time_start] = motion_lib[motion_index].getGait();
+        motion_ID[i-time_start] = motion_lib[motion_index].getID();
     }  
     auto end_total   = high_resolution_clock::now();
     auto duration_total = duration_cast<microseconds>(end_total - start_total);
@@ -156,7 +181,7 @@ int main(int argc, char* argv[]){
     cout << "Max Frequency (Hz): " << (1000000.0*dataLen)/duration_total_time << endl;
 
     // saveResult(outputFileName, test_matcher.r, test_matcher.N);
-    saveResult(outputFileName, gait_pct, dataLen);
+    saveResult(outputFileName, gait_pct, motion_ID, dataLen);
 
     delete [] sensor_data;
     delete [] motion_score;
