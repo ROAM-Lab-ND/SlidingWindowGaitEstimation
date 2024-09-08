@@ -4,9 +4,9 @@ class MotionMatcher {
 public:
     size_t N;   // Length of kernel
     size_t m;   // Number of kernels (each one represent a channel)
-    float * rk; // Duplicated rolling kernel, dim: 2Nxm
-    float * r;  // Result, dim: N
-    float * w;  // Windowed data, dim: Nxm
+    unique_ptr<float[]> rk; // Duplicated rolling kernel, dim: 2Nxm
+    unique_ptr<float[]> r;  // Result, dim: N
+    unique_ptr<float[]> w;  // Windowed data, dim: Nxm
     int ind = 0;// Rolling index
     int match_ind = 0; // Index that best match
     float min_error = 0; // Minimum SSE error
@@ -43,15 +43,6 @@ public:
         ready = true;
     }
 
-    ~MotionMatcher () {
-        #ifdef DETAIL_PRINT
-        cout << "Destructing MotionMatcher - Plain" << endl;
-        #endif
-        delete [] rk;
-        delete [] w;
-        delete [] r;
-    }
-
     void init (string kernel_path) {
         loadKernel(kernel_path);
         initCache();
@@ -61,9 +52,9 @@ public:
 
     void initCache () {
         // Create data matrix
-        w = new float[N * m];
+        w.reset(new float[N * m]); // = new float[N * m];
         // Create result array
-        r = new float[N];
+        r.reset(new float[N]); // = new float[N];
     }
 
     void clearCache (){
@@ -132,7 +123,7 @@ public:
         // Can be used for future
         getline(kernel_file,linestr);
 
-        rk  = new float[m * 2 * N];
+        rk.reset(new float[m * 2 * N]); //  = new float[m * 2 * N];
         #ifdef DETAIL_PRINT
         float k[N][m];
         #endif //DETAIL_PRINT
@@ -206,9 +197,9 @@ public:
     }
 
     float getMatch() {
-        float* minError = min_element(r, r + N);
+        float* minError = min_element(r.get(), r.get() + N);
         min_error = *minError;
-        match_ind = (minError - r) - ind; // Shifted by ind
+        match_ind = (minError - r.get()) - ind; // Shifted by ind
         if (match_ind < 0) {
             match_ind += N;
         }
