@@ -2,9 +2,22 @@ clc;
 clear all;
 close all;
 expdata = 'Multispeed_Walk_AB.mat';
-tstart = 4000 + 1;
+tstart_matlab = 4000 + 1;
 tend = 7000;
-[gait_plain, act_index_plain] = SSE_classification_plain(expdata,tstart,tend);
+[gait_plain, act_index_plain] = SSE_classification_plain(expdata,tstart_matlab,tend);
+
+%% 
+tstart_CPP = tstart_matlab - 1;
+database_path = "../Data/DataBase_CSV";
+experiment_path = "../Data/Experiment_CSV/Multispeed_Walk_AB.csv";
+command_list = [database_path, experiment_path, num2str(tstart_CPP), num2str(tend)];
+[~,~] = system("../build/SSEtrick " + join(command_list, " ") + " ../CPPResult/Test_Trick.csv");
+
+assert(system("../build/SSEtrick " + join(command_list, " ") + " ../CPPResult/Test_Trick.csv")==0);
+assert(system("../build/SSEtrickEigen " + join(command_list, " ") + " ../CPPResult/Test_Trick_Eigen.csv")==0);
+assert(system("../build/SSEplain " + join(command_list, " ") + " ../CPPResult/Test_Plain.csv")==0);
+assert(system("../build/SSEplainEigen " + join(command_list, " ") + " ../CPPResult/Test_Plain_Eigen.csv")==0);
+
 
 %% 
 

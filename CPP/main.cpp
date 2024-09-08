@@ -18,17 +18,19 @@
     #if MODE == MODE_PLAIN
         // Compiling motion matcher with plain mode (no computation saving)
         #include "MotionMatcher_Plain.hpp"
-        // #error "PLAIN is under dev."
+        #define ALGORITHM_NAME "Plain (without trick) - pointer implementation"
     #elif MODE == MODE_TRICK
         // Compiling motion matcher with trick mode (with computation saving)
         #include "MotionMatcher_Trick.hpp"
+        #define ALGORITHM_NAME "Trick (moving window) - pointer implementation"
     #elif MODE == MODE_PLAIN_EIGEN
         // Compiling motion matcher with plain mode (no computation saving)
         #include "MotionMatcher_Plain_Eigen.hpp"
-        // #error "PLAIN is under dev."
+        #define ALGORITHM_NAME "Plain (without trick) - Eigen implementation"
     #elif MODE == MODE_TRICK_EIGEN
         // Compiling motion matcher with trick mode (with computation saving)
         #include "MotionMatcher_Trick_Eigen.hpp"
+        #define ALGORITHM_NAME "Trick (moving window) - Eigen implementation"
     #else
         #error "Bad MODE definitation, must be MODE_PLAIN, MODE_TRICK, MODE_PLAIN_EIGEN, or MODE_TRICK_EIGEN"
     #endif
@@ -172,7 +174,7 @@ int main(int argc, char* argv[]){
     float gait_pct[dataLen];
     int  motion_ID[dataLen];
   
-    cout << "Start" << endl;
+    cout << "\nStart: " << ALGORITHM_NAME << endl;
     float* best_motion;
     int motion_index;
     auto start_total = high_resolution_clock::now();
@@ -197,7 +199,7 @@ int main(int argc, char* argv[]){
     
     cout << "Total Time (us): " << duration_total_time << endl;
     cout << "Time Per Data (us): " << duration_total_time/dataLen << endl;
-    cout << "Max Frequency (Hz): " << (1000000.0*dataLen)/duration_total_time << endl;
+    // cout << "Max Frequency (Hz): " << (1000000.0*dataLen)/duration_total_time << endl;
 
     // saveResult(outputFileName, test_matcher.r, test_matcher.N);
     saveResult(outputFileName, gait_pct, motion_ID, dataLen);
