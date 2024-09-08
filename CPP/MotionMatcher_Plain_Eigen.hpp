@@ -1,12 +1,13 @@
 #include "helper.hpp"
+#include <Eigen/Dense>
 
 class MotionMatcher {
 public:
     size_t N;   // Length of kernel
     size_t m;   // Number of kernels (each one represent a channel)
-    float * rk; // Duplicated rolling kernel, dim: 2Nxm
-    float * r;  // Result, dim: N
-    float * w;  // Windowed data, dim: Nxm
+    Eigen::ArrayXXf rk; // Duplicated rolling kernel, dim: 2Nxm
+    Eigen::ArrayXf r;  // Result, dim: N
+    Eigen::ArrayXXf w; // Windowed data, dim: Nxm
     int ind = 0;// Rolling index
     int match_ind = 0; // Index that best match
     float min_error = 0; // Minimum SSE error
@@ -43,15 +44,6 @@ public:
         ready = true;
     }
 
-    ~MotionMatcher () {
-        #ifdef DETAIL_PRINT
-        cout << "Destructing MotionMatcher - Plain" << endl;
-        #endif
-        delete [] rk;
-        delete [] w;
-        delete [] r;
-    }
-
     void init (string kernel_path) {
         loadKernel(kernel_path);
         initCache();
@@ -61,9 +53,9 @@ public:
 
     void initCache () {
         // Create data matrix
-        w = new float[N * m];
+        w.resize(N,m); // = new float[N * m];
         // Create result array
-        r = new float[N];
+        r.resize(N); // = new float[N];
     }
 
     void clearCache (){
@@ -71,16 +63,10 @@ public:
         ind = 0;
         
         // Clear data matrix
-        for (int row = 0; row < N; row++){
-            for (int col = 0; col < m; col++){
-                w[row * m + col] = 0.0;
-            }
-        }
+        w.setZero(N, m);
         
         // Clear result array
-        for (size_t col = 0; col < N; col++){
-            r[col] = 0;
-        }
+        r.setZero(N);
 
     }
 
@@ -132,7 +118,7 @@ public:
         // Can be used for future
         getline(kernel_file,linestr);
 
-        rk  = new float[m * 2 * N];
+        rk.resize(2*N, m); //  = new float[m * 2 * N];
         #ifdef DETAIL_PRINT
         float k[N][m];
         #endif //DETAIL_PRINT
@@ -148,8 +134,8 @@ public:
                 k[i_time][i_kernel] = temp;
                 #endif //DETAIL_PRINT
                 int ind_rolling = (i_time != 0) ? (N - i_time) : 0;
-                rk[      ind_rolling * m + i_kernel] = temp;
-                rk[(N + ind_rolling) * m + i_kernel] = temp;
+                rk(    i_time, i_kernel) = temp;
+                rk(N + i_time, i_kernel) = temp;
 
                 #ifdef DETAIL_PRINT
                 cout    << k[i_time][i_kernel] << ", ";
@@ -178,20 +164,11 @@ public:
 
     float pushData(float* newdata) {
         for (size_t i = 0; i < m; ++i) {
-            w[ind * m + i] = newdata[i];
+            w(ind, i) = newdata[i];
         }
-        float diff;
         for (size_t j = 0; j < N; ++j) {
             // For each sliding config
-            r[j] = 0.0;
-            for (size_t time_ind = 0; time_ind < N; ++time_ind) {
-                // float temp = 0.0; // SSE for 
-                for (size_t i = 0; i < m; ++i) {
-                    diff = rk[(j + N - time_ind) * m + i] - w[time_ind * m + i];
-                    r[j] +=  diff * diff;
-                }
-                // r[j] += temp;
-            }
+            r(j) = (rk.block(N-j,0,N,m) - w).square().sum();
         }
         
         // step size is 1
@@ -206,9 +183,9 @@ public:
     }
 
     float getMatch() {
-        float* minError = min_element(r, r + N);
-        min_error = *minError;
-        match_ind = (minError - r) - ind; // Shifted by ind
+        Eigen::Index minRow, minCol;
+        min_error = r.minCoeff(&minRow, &minCol);
+        match_ind = minRow - ind; // Shifted by ind
         if (match_ind < 0) {
             match_ind += N;
         }

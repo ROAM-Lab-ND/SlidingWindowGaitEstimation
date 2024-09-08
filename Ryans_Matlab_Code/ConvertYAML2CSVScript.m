@@ -24,11 +24,13 @@ DATANAME = "Multispeed_Walk_AB";
 data_length = length(collected_data.FullStudy.timestamp);
 data_name = {'RThighAng', 'LThighAng', 'RShankAng', 'LShankAng'};
 data_num  = length(data_name);
-if ~exist("../Data/Experiment_CSV/",'dir')
+
+csvpath = "../Data/Experiment_CSV/";
+if ~exist(csvpath,'dir')
     % if dir doesn't exist, create one
-    mkdir("../Data/Experiment_CSV/");
+    mkdir(csvpath);
 end
-file_csv = fopen("../Data/Experiment_CSV/" + DATANAME + ".csv",'w');
+file_csv = fopen(csvpath + DATANAME + ".csv",'w');
 
 % Output headers
 fprintf(file_csv,'Dimension:%dx%d',data_num,data_length);

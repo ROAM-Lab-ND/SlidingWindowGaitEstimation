@@ -44,7 +44,7 @@ public:
     }
 
     ~MotionMatcher () {
-        #ifdef DEBUG
+        #ifdef DETAIL_PRINT
         cout << "Destructing MotionMatcher" << endl;
         #endif
         delete [] rk;
@@ -102,21 +102,15 @@ public:
             SplitString(line_split_str,field_split,":");
             if (field_split[0] == "Name") {
                 kernel_name = field_split[1]; // Name of motion
-                #ifdef DEBUG
-                disp(kernel_name);
-                #endif
             }else if (field_split[0] == "ID") {
                 kernel_id = atoi(field_split[1].c_str()); // ID of motion
-                #ifdef DEBUG
-                disp(kernel_id);
-                #endif
             }else if (field_split[0] == "Dimension") {
                 vector_split.clear();
                 SplitString(field_split[1],vector_split,"x");
                 m = atoi(vector_split[0].c_str()); // Number of kernels
                 N = atoi(vector_split[1].c_str()); // Length of kernel
                 hasDim = true;
-                #ifdef DEBUG
+                #ifdef DETAIL_PRINT
                 disp(m);
                 disp(N);
                 #endif

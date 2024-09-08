@@ -9,7 +9,10 @@
 // #define MODE MODE_TRICK
 #define MODE_PLAIN 0
 #define MODE_TRICK 1
+#define MODE_PLAIN_EIGEN 2
+#define MODE_TRICK_EIGEN 3
 
+#define CLASSIFICATION
 
 #ifdef MODE
     #if MODE == MODE_PLAIN
@@ -19,8 +22,15 @@
     #elif MODE == MODE_TRICK
         // Compiling motion matcher with trick mode (with computation saving)
         #include "MotionMatcher_Trick.hpp"
+    #elif MODE == MODE_PLAIN_EIGEN
+        // Compiling motion matcher with plain mode (no computation saving)
+        #include "MotionMatcher_Plain_Eigen.hpp"
+        // #error "PLAIN is under dev."
+    #elif MODE == MODE_TRICK_EIGEN
+        // Compiling motion matcher with trick mode (with computation saving)
+        #include "MotionMatcher_Trick_Eigen.hpp"
     #else
-        #error "Bad MODE definitation, must be MODE_PLAIN or MODE_TRICK"
+        #error "Bad MODE definitation, must be MODE_PLAIN, MODE_TRICK, MODE_PLAIN_EIGEN, or MODE_TRICK_EIGEN"
     #endif
 #else
     #error "MODE is not defined"
@@ -137,15 +147,20 @@ int main(int argc, char* argv[]){
 
 
     // Load motion library
-    int num_motion = csvFiles.size();
     vector<MotionMatcher> motion_lib;
+    #ifdef CLASSIFICATION
+    int num_motion = csvFiles.size();
     motion_lib.reserve(num_motion);
     for(const auto& file : csvFiles) {
         motion_lib.emplace_back(file);
     }
-    // for (size_t i_motion = 0; i_motion < num_motion; ++i_motion) {
-    //     motion_lib.emplace_back("/Users/whitebook/Desktop/ConvolutionGaitPhaseEstimation/Data/DataBase_CSV/Slow_AB_Reference.csv");
-    // }
+    #else
+    int num_motion = 1;
+    motion_lib.reserve(num_motion);
+    for (size_t i_motion = 0; i_motion < num_motion; ++i_motion) {
+        motion_lib.emplace_back("/Users/whitebook/Desktop/ConvolutionGaitPhaseEstimation/Data/DataBase_CSV/Slow_AB_Reference.csv");
+    }
+    #endif
 
     float* motion_score = new float[num_motion];
     
@@ -163,6 +178,10 @@ int main(int argc, char* argv[]){
     auto start_total = high_resolution_clock::now();
     for (size_t i = time_start; i < time_end; ++i) {
         // Each data frame
+
+        #ifdef DETAIL_PRINT
+        cout << "Tiem step:" << i << endl;
+        #endif //DETAIL_PRINT
         newData = sensor_data + (i * m);
         for (size_t i_motion = 0; i_motion < num_motion; ++i_motion) {
             motion_score[i_motion] = motion_lib[i_motion].pushData(newData);

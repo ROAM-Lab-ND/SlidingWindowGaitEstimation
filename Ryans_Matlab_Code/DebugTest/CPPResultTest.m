@@ -11,18 +11,19 @@ gait_without_saving = sse_without_saving(expdata,tstart,tend);
 CPPResult_Trick = readmatrix("../CPPResult/Test_Trick.csv");
 CPPResult_Plain = readmatrix("../CPPResult/Test_Plain.csv");
 % CPPResult_PlainTest = readmatrix("../CPPResult/Test.csv");
+% CPPResult_PlainTest = readmatrix("../CPPResult/Test_Plain_Eigen.csv");
 
 %
 
 figure(1)
 clf;
 hold on
-plot(gait_without_saving,'LineWidth',4,'DisplayName',"SSE without save")
+plot(gait_without_saving,'LineWidth',4,'DisplayName',"SSE Plain")
 % plot(gait_with_saving,'-.','LineWidth',2,'DisplayName',"SSE with save")
 
-% plot(CPPResult_PlainTest,'-','LineWidth',2,'DisplayName',"CPP Test without save");
-plot(CPPResult_Plain,'-','LineWidth',2,'DisplayName',"CPP without save");
-plot(CPPResult_Trick,'--','LineWidth',2,'DisplayName',"CPP with save");
+% plot(CPPResult_PlainTest(:,1),'-','LineWidth',2,'DisplayName',"CPP Test Plain");
+plot(CPPResult_Plain(:,1),'--','LineWidth',2,'DisplayName',"CPP Plain");
+plot(CPPResult_Trick(:,1),'--','LineWidth',2,'DisplayName',"CPP Trick");
 
 legend()
 

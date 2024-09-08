@@ -10,6 +10,13 @@ tend = 7000;
 
 CPPResult_Trick = readmatrix("../CPPResult/Test_Trick.csv");
 CPPResult_Plain = readmatrix("../CPPResult/Test_Plain.csv");
+CPPResult_Trick_Eigen = readmatrix("../CPPResult/Test_Trick_Eigen.csv");
+CPPResult_Plain_Eigen = readmatrix("../CPPResult/Test_Plain_Eigen.csv");
+
+fprintf("Result check for non-Eigen and Eigen version of Trick method: %d\n",...
+    all(all(CPPResult_Trick - CPPResult_Trick_Eigen == 0)));
+fprintf("Result check for non-Eigen and Eigen version of Plain method: %d\n",...
+    all(all(CPPResult_Plain - CPPResult_Plain_Eigen == 0)));
 %% 
 
 
@@ -18,14 +25,14 @@ clf;
 tiledlayout(2,1);
 nexttile;
 hold on
-plot(gait_plain,'LineWidth',6,'DisplayName',"SSE Plain")
-plot(CPPResult_Plain(:,1),'-','LineWidth',2,'DisplayName',"CPP without save");
-plot(CPPResult_Trick(:,1),'--','LineWidth',2,'DisplayName',"CPP with save");
+plot(gait_plain,'LineWidth',10,'Color',[0.5 0.5 0.5 0.5],'DisplayName',"SSE Plain")
+plot(CPPResult_Plain(:,1),'-','LineWidth',2,'DisplayName',"CPP Plain");
+plot(CPPResult_Trick(:,1),'--','LineWidth',2,'DisplayName',"CPP Trick");
 nexttile;
 hold on
-plot(act_index_plain,'LineWidth',6,'DisplayName',"SSE Plain")
-plot(CPPResult_Plain(:,2),'-','LineWidth',2,'DisplayName',"CPP without save");
-plot(CPPResult_Trick(:,2),'--','LineWidth',2,'DisplayName',"CPP with save");
+plot(act_index_plain,'LineWidth',10,'Color',[0.5 0.5 0.5 0.5],'DisplayName',"SSE Plain")
+plot(CPPResult_Plain(:,2),'-','LineWidth',2,'DisplayName',"CPP Plain");
+plot(CPPResult_Trick(:,2),'--','LineWidth',2,'DisplayName',"CPP Trick");
 legend
 
 
