@@ -156,18 +156,7 @@ public:
         kernel_file.close();
     }
 
-    void testFunction(float* newdata) {
-        disp(newdata);
-        for (size_t i = 0; i < m; ++i){
-            cout << newdata[i] << ", ";
-        }
-        cout << endl;
-        
-
-    }
-
-
-    float pushData(float* newdata) {
+    float pushData(const float* newdata) {
         float temp, diff;
         for (size_t j = 0; j < N; ++j) {
             r[j] -= A[ind * N + j];

@@ -151,18 +151,7 @@ public:
         kernel_file.close();
     }
 
-    void testFunction(float* newdata) {
-        disp(newdata);
-        for (size_t i = 0; i < m; ++i){
-            cout << newdata[i] << ", ";
-        }
-        cout << endl;
-        
-
-    }
-
-
-    float pushData(float* newdata) {
+    float pushData(const float* newdata) {
         for (size_t i = 0; i < m; ++i) {
             w(ind, i) = newdata[i];
         }
