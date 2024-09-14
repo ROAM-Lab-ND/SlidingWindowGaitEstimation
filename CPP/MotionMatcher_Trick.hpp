@@ -1,3 +1,4 @@
+#include <memory>
 #include "helper.hpp"
 
 class MotionMatcher {
@@ -158,6 +159,8 @@ public:
 
     float pushData(const float* newdata) {
         float temp, diff;
+        float min_temp = INFINITY;
+        int min_ind;
         for (size_t j = 0; j < N; ++j) {
             r[j] -= A[ind * N + j];
             temp = 0.0;
@@ -167,6 +170,10 @@ public:
             }
             A[ind * N + j] = temp;
             r[j] += temp;
+            if (r[j] < min_temp) {
+                min_temp = r[j];
+                min_ind = j;
+            }
         }
         
         // step size is 1
@@ -176,7 +183,12 @@ public:
         }
         // ind = (ind + 1) % N;
 
-        return getMatch();
+        // return getMatch();
+        match_ind = min_ind  - ind;
+        if (match_ind < 0) {
+            match_ind += N;
+        }
+        return min_temp;
 
     }
 

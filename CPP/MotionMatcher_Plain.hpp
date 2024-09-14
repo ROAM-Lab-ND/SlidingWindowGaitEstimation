@@ -1,3 +1,4 @@
+#include <memory>
 #include "helper.hpp"
 
 class MotionMatcher {

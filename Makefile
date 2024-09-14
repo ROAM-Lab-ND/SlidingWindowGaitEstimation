@@ -1,6 +1,7 @@
 BUILDPATH=./build/
 
-CC=clang++
+CC=g++-14
+# CC=clang++
 IPATHS=-I $(shell brew --prefix eigen)/include/eigen3
 
 HEADERS=$(shell find ./CPP -type f -name *.hpp)
