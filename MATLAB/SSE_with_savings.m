@@ -2,6 +2,8 @@ clc;
 clear all;
 close all;
 
+warning("This matlab code with sliding window trick has bug! The output result is incorrect! Please do run this.");
+
 Slow_AB = ReadYaml('Slow_AB_Reference.yaml');
 Med_AB = ReadYaml('Med_AB_Reference.yaml');
 Fast_AB = ReadYaml('Fast_AB_Reference.yaml');
