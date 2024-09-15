@@ -119,6 +119,35 @@ else
 fi
 
 
+
+if [ -d "./MATLAB/PopIn" ]; then
+    # Found Eigen
+    echo -e "${SUCCEED} You have PopIn in the ./MATLAB folder"
+else
+    echo -e "${INQUIRE} No PopIn in the ./MATLAB folder, do you want to download now? [y/N]: "
+    read -r USER_INPUT
+
+    if [[ "$USER_INPUT" =~ ^[Yy]$ ]]; then
+        echo -e "${INFO} Downloading and unzipping........."
+
+        if command_exists curl; then
+            curl -sS -L -o PopIn.zip https://github.com/DavidMercier/PopIn/archive/refs/heads/master.zip
+        elif command_exists clang++; then
+            wget -q -O PopIn.zip https://github.com/DavidMercier/PopIn/archive/refs/heads/master.zip
+        else
+            echo -e "${ERROR} curl nor wget command is found. Cannot download PopIn. Carrying on."
+        fi
+
+        if [ -f "PopIn.zip" ]; then
+            unzip -qq PopIn.zip -d ./MATLAB/
+            mv ./MATLAB/PopIn-master ./MATLAB/PopIn
+            rm PopIn.zip
+            echo -e "${SUCCEED} PopIn downloaded to the ./MATLAB folder"
+        fi
+    fi
+fi
+
+
 echo -e "${SUCCEED} Setup complete! You can now run 'make all' to build the project."
 
 echo -e "${INFO} Then use './runtest.sh' to run test."
