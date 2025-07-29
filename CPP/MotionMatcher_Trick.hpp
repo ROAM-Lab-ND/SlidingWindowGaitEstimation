@@ -6,7 +6,7 @@ public:
     size_t N;   // Length of kernel
     size_t m;   // Number of channels (each one represent a channel)
     unique_ptr<float[]> rk; // Duplicated rolling kernel, dim: 2Nxm
-    unique_ptr<float[]> A;  // Cache matrix, dim: NxN
+    unique_ptr<float[]> A;  // Cache matrix, dim: NxN (a.k.a, S matrix in Alg. 2 of the paper)
     unique_ptr<float[]> r;  // Result, dim: N
     int ind = 0;// Rolling index
     int match_ind = 0; // Index that best match

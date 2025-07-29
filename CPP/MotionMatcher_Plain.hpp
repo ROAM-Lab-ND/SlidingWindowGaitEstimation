@@ -4,7 +4,7 @@
 class MotionMatcher {
 public:
     size_t N;   // Length of kernel
-    size_t m;   // Number of kernels (each one represent a channel)
+    size_t m;   // Number of channels (each one represent a channel)
     unique_ptr<float[]> rk; // Duplicated rolling kernel, dim: 2Nxm
     unique_ptr<float[]> r;  // Result, dim: N
     unique_ptr<float[]> w;  // Windowed data, dim: Nxm

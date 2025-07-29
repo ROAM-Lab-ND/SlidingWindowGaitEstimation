@@ -6,9 +6,9 @@ typedef Eigen::Array<float, 1, Eigen::Dynamic> RowArrayXf;
 class MotionMatcher {
 public:
     size_t N;   // Length of kernel
-    size_t m;   // Number of kernels (each one represent a channel)
+    size_t m;   // Number of channels (each one represent a channel)
     Eigen::ArrayXXf rk; // Duplicated rolling kernel, dim: 2Nxm
-    Eigen::ArrayXXf A;  // Cache matrix, dim: NxN
+    Eigen::ArrayXXf A;  // Cache matrix, dim: NxN (a.k.a, S matrix in Alg. 2 of the paper)
     float place_holder_float = 1.0;
     RowArrayXf d;  // New data, dim: 1xm
     Eigen::ArrayXf r;  // Result, dim: N

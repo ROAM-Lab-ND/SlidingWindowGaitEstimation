@@ -84,8 +84,8 @@ Time Per Data (us): 3.35767
 ### Flag Definitions 
 We have four different implementations with two set of flags: Trick/Plain and Homemade/Eigen.
 Suppose we have $M$ activities and each activity has $N$ data.
-- **Trick** - using sliding window trick, time complexity $\mathcal{O}(N\cdot M)$, space complexity $\mathcal{O}(M\cdot N^2)$.
-- **Plain** - (a.k.a., **Naive** in paper) no computation save, compute SSE from scratch, time complexity $\mathcal{O}(M\cdot N^2)$, space complexity $\mathcal{O}(N\cdot M)$.
+- **Trick** - (a.k.a., **Efficient / Alg. 2** in the paper) using sliding window trick, time complexity $\mathcal{O}(N\cdot M)$, space complexity $\mathcal{O}(M\cdot N^2)$.
+- **Plain** - (a.k.a., **Naive** in the paper) no computation save, compute SSE from scratch, time complexity $\mathcal{O}(M\cdot N^2)$, space complexity $\mathcal{O}(N\cdot M)$.
 - **Homemade** - (i.e., **pointer**) store and compute array/matrix with pointer, probably less overhead.
 - **Eigen** - store array/matrix with Eigen array type, and compute with Eigen function, better vectorization due to explicit AVX/SIMD call, cleaner expression.
 

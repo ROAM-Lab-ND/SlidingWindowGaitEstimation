@@ -60,7 +60,7 @@ fi
 # Check if the selected compiler (CC) is linked to clang
 if $CC --version 2>/dev/null | grep -q "clang"; then
     echo -e "${WARNING} Only clang++ is found or g++ is linked to clang++."
-    echo -e "${INFO} Program compiled via clang++ is marginally slower than the on via g++."
+    echo -e "${INFO} Program compiled via clang++ is marginally slower than the one via g++."
     echo -e "${INQUIRE} Do you want to manually specify a different compiler? [y/N]: "
     read -r USER_INPUT
 
@@ -90,6 +90,7 @@ else
             EIGEN_DIR="/usr/include/eigen3/"
         else
             # No Eigen at default path Trying to ask homebrew
+            echo -e "${INFO} Eigen not found. Asking homebrew..."
             EIGEN_DIR=$(brew --prefix eigen 2>&1)/include/eigen3
             if [[ $? -eq 0 ]]; then
                 echo -e "${SUCCEED} Found Eigen: $EIGEN_DIR"
@@ -115,13 +116,13 @@ else
     echo -e "              e.g. ./setup.h g++-14 /usr/include/eigen3"
     echo "# Eigen" >> config.mk
     echo "EIGEN_FOUND = 0" >> config.mk
-    echo "EIGEN_DIR = $EIGEN_DIR" >> config.mk # Should not be used
+    echo "EIGEN_DIR = ." >> config.mk # Should not be used
 fi
 
 
 
 if [ -d "./MATLAB/PopIn" ]; then
-    # Found Eigen
+    # Found PopIn
     echo -e "${SUCCEED} You have PopIn in the ./MATLAB folder"
 else
     echo -e "${INQUIRE} No PopIn in the ./MATLAB folder, do you want to download now? [y/N]: "
@@ -132,7 +133,7 @@ else
 
         if command_exists curl; then
             curl -sS -L -o PopIn.zip https://github.com/DavidMercier/PopIn/archive/refs/heads/master.zip
-        elif command_exists clang++; then
+        elif command_exists wget; then
             wget -q -O PopIn.zip https://github.com/DavidMercier/PopIn/archive/refs/heads/master.zip
         else
             echo -e "${ERROR} curl nor wget command is found. Cannot download PopIn. Carrying on."

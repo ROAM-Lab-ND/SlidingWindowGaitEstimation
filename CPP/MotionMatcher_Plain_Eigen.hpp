@@ -4,7 +4,7 @@
 class MotionMatcher {
 public:
     size_t N;   // Length of kernel
-    size_t m;   // Number of kernels (each one represent a channel)
+    size_t m;   // Number of channels (each one represent a channel)
     Eigen::ArrayXXf rk; // Duplicated rolling kernel, dim: 2Nxm
     Eigen::ArrayXf r;  // Result, dim: N
     Eigen::ArrayXXf w; // Windowed data, dim: Nxm
